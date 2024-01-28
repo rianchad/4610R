@@ -1,0 +1,264 @@
+/*----------------------------------------------------------------------------*/
+/*                                                                            */
+/*    Module:       main.cpp                                                  */
+/*    Author:       VEX                                                       */
+/*    Created:      Wed January 17 2024                                       */
+/*    Description:  Match Auton for 4610R Banshee Robot                       */
+/*                                                                            */
+/*------------------------------------- ---------------------------------------*/
+
+// ---- START VEXCODE CONFIGURED DEVICES ----
+// Robot Configuration:
+// [Name]               [Type]        [Port(s)]
+// Controller1          controller                    
+// Inertial1            inertial      1               
+// leftFront            motor         20              
+// leftMid              motor         10              
+// leftBack             motor         15              
+// rightFront           motor         17              
+// rightMid             motor         4               
+// rightBack            motor         11              
+// DigitalOutE          digital_out   E               
+// ---- END VEXCODE CONFIGURED DEVICES ----
+
+#include "vex.h"
+
+using namespace vex;
+
+// I've coded today!
+competition Competition;
+void splitDrive(){
+  while (true){
+    int x=0;
+
+    if (Controller1.ButtonRight.pressing()) {
+    x=-100;
+  }
+  if (Controller1.ButtonLeft.pressing()) {
+    x=100;
+  }
+
+    leftFront.spin(forward, Controller1.Axis3.position() + Controller1.Axis1.position()-x, pct);
+    leftMid.spin(forward, Controller1.Axis3.position() + Controller1.Axis1.position(), pct);
+    leftBack.spin(forward, Controller1.Axis3.position() + Controller1.Axis1.position()+x, pct);
+    
+    rightFront.spin(forward, Controller1.Axis3.position() - Controller1.Axis1.position()+x, pct);
+    rightMid.spin(forward, Controller1.Axis3.position() - Controller1.Axis1.position(), pct);
+    rightBack.spin(forward, Controller1.Axis3.position() - Controller1.Axis1.position()-x, pct);
+    
+
+  if(Controller1.ButtonL2.pressing()){
+    DigitalOutE.set(true);
+  }
+  if(Controller1.ButtonL1.pressing())
+  {
+    DigitalOutE.set(false);
+  }
+  }
+}
+
+void driveForward(double distance){
+leftFront.setPosition(0, degrees);
+int speed = 100;
+while (leftFront.position(degrees)<distance){
+        leftFront.spin(fwd, speed, pct);
+        rightFront.spin(fwd, speed, pct);
+        leftBack.spin(fwd, speed, pct);
+        rightBack.spin(fwd, speed, pct);
+        leftMid.spin(fwd, speed, pct);
+        rightMid.spin(fwd, speed, pct);
+
+
+}
+    leftFront.stop();
+    rightFront.stop();
+    leftBack.stop();
+    rightBack.stop();
+    leftMid.stop();
+    rightMid.stop();
+}
+
+void driveReverse(double distance){
+leftFront.setPosition(0, degrees);
+int speed = -100;
+while (leftFront.position(degrees)>-distance){
+        leftFront.spin(fwd, speed, pct);
+        rightFront.spin(fwd, speed, pct);
+        leftBack.spin(fwd, speed, pct);
+        rightBack.spin(fwd, speed, pct);
+        leftMid.spin(fwd, speed, pct);
+        rightMid.spin(fwd, speed, pct);
+
+
+}
+    leftFront.stop();
+    rightFront.stop();
+    leftBack.stop();
+    rightBack.stop();
+    leftMid.stop();
+    rightMid.stop();
+}
+void turnLeft(int target) {   
+    //Turn Left by using fuzzy ranges
+    Inertial1.resetRotation();
+    wait(.25, sec); //Sometimes Intertial/Gyro Sensors need some time to settle
+    
+    double change_point = 45; 
+    double fast_speed = 100;
+    double slow_speed = 25;
+
+    while(Inertial1.rotation(degrees) > -target + change_point) {
+        int speed = fast_speed;  
+
+        leftFront.spin(reverse, speed, pct);
+        rightFront.spin(fwd, speed, pct);
+        leftBack.spin(reverse, speed, pct);
+        rightBack.spin(fwd, speed, pct);
+        leftMid.spin(reverse, speed, pct);
+        rightMid.spin(fwd, speed, pct);
+    }
+
+    while(Inertial1.rotation(degrees) > -target) {
+        int speed = slow_speed;  
+
+        leftFront.spin(reverse, speed, pct);
+        rightFront.spin(fwd, speed, pct);
+        leftBack.spin(reverse, speed, pct);
+        rightBack.spin(fwd, speed, pct);
+        leftMid.spin(reverse, speed, pct);
+        rightMid.spin(fwd, speed, pct);
+    }
+
+    leftFront.stop();
+    rightFront.stop();
+    leftBack.stop();
+    rightBack.stop();
+    leftMid.stop();
+    rightMid.stop();
+}
+
+void turnRight(int target) {   
+    //Turn Left by using fuzzy ranges
+    Inertial1.resetRotation();
+    wait(.25, sec); //Sometimes Intertial/Gyro Sensors need some time to settle
+    
+    double change_point = 45; 
+    double fast_speed = 100;
+    double slow_speed = 25;
+
+    while(Inertial1.rotation(degrees) < target - change_point) {
+        int speed = fast_speed;  
+
+        leftFront.spin(fwd, speed, pct);
+        rightFront.spin(reverse, speed, pct);
+        leftBack.spin(fwd, speed, pct);
+        rightBack.spin(reverse, speed, pct);
+        leftMid.spin(fwd, speed, pct);
+        rightMid.spin(reverse, speed, pct);
+    }
+
+    while(Inertial1.rotation(degrees) < target) {
+        int speed = slow_speed;  
+
+        leftFront.spin(fwd, speed, pct);
+        rightFront.spin(reverse, speed, pct);
+        leftBack.spin(fwd, speed, pct);
+        rightBack.spin(reverse, speed, pct);
+        leftMid.spin(fwd, speed, pct);
+        rightMid.spin(reverse, speed, pct);
+    }
+    
+    leftFront.stop();
+    rightFront.stop();
+    leftBack.stop();
+    rightBack.stop();
+    leftMid.stop();
+    rightMid.stop();
+}
+
+
+// define your global instances of motors and other devices here
+
+/*---------------------------------------------------------------------------*/
+/*                          Pre-Autonomous Functions                         */
+/*                                                                           */
+/*  You may want to perform some actions before the competition starts.      */
+/*  Do them in the following function.  You must return from this function   */
+/*  or the autonomous and usercontrol tasks will not be started.  This       */
+/*  function is only called once after the V5 has been powered on and        */
+/*  not every time that the robot is disabled.                               */
+/*---------------------------------------------------------------------------*/
+
+void pre_auton(void) {
+  // Initializing Robot Configuration. DO NOT REMOVE!
+  vexcodeInit();
+  Inertial1.calibrate();
+  wait(3, seconds);
+  // All activities that occur before the competition starts
+  // Example: clearing encoders, setting servo positions, ...
+}
+
+/*---------------------------------------------------------------------------*/
+/*                                                                           */
+/*                              Autonomous Task                              */
+/*                                                                           */
+/*  This task is used to control your robot during the autonomous phase of   */
+/*  a VEX Competition.                                                       */
+/*                                                                           */
+/*  You must modify the code to add your own robot specific commands here.   */
+/*---------------------------------------------------------------------------*/
+
+void autonomous(void) {
+  driveForward(800);
+  wait(.5, seconds);
+  driveReverse(800);
+  turnLeft(60);
+  
+  // ..........................................................................
+  // Insert autonomous user code here.
+  // ..........................................................................
+}
+
+/*---------------------------------------------------------------------------*/
+/*                                                                           */
+/*                              User Control Task                            */
+/*                                                                           */
+/*  This task is used to control your robot during the user control phase of */
+/*  a VEX Competition.                                                       */
+/*                                                                           */
+/*  You must modify the code to add your own robot specific commands here.   */
+/*---------------------------------------------------------------------------*/
+
+void usercontrol(void) {
+  // User control code here, inside the loop
+    splitDrive();
+
+    // This is the main execution loop for the user control program.
+    // Each time through the loop your program should update motor + servo
+    // values based on feedback from the joysticks.
+
+    // ........................................................................
+    // Insert user code here. This is where you use the joystick values to
+    // update your motors, etc.
+    // ........................................................................
+
+    wait(20, msec); // Sleep the task for a short amount of time to
+                    // prevent wasted resources.
+  }
+
+//    
+// Main will set up the competition functions and callbacks.
+//
+int main() {
+  // Set up callbacks for autonomous and driver control periods.
+  Competition.autonomous(autonomous);
+  Competition.drivercontrol(usercontrol);
+
+  // Run the pre-autonomous function.
+  pre_auton();
+
+  // Prevent main from exiting with an infinite loop.
+  while (true) {
+    wait(100, msec);
+  }
+}
