@@ -54,6 +54,9 @@ void splitDrive(){
   {
     DigitalOutE.set(false);
   }
+  if(Controller1.ButtonR2.pressing()){
+    DigitalOutD.set(true);
+  }
   }
 }
 
